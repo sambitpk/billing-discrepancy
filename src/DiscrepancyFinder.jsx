@@ -62,21 +62,36 @@ export default function DiscrepancyFinder() {
   const [errorMsg, setErrorMsg] = useState('');
   const fileInputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [selectedModel, setSelectedModel] = useState('gemini-2.5-flash-lite');
 
 
   const extractTextFromPDF = async (file) => {
     try {
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      let fullText = '';
+      let billingText = '';
+      
+      const billingKeywords = ['invoice', 'charge', 'cpt', 'balance', 'total', 'amount', 'billed', 'payment', 'insurance', 'service date', 'drg'];
       
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
         const pageText = textContent.items.map(item => item.str).join(' ');
-        fullText += `Page ${i}:\n${pageText}\n\n`;
+        
+        const textLower = pageText.toLowerCase();
+        // Keep page if it's a short PDF or if it contains at least one billing keyword
+        const isBillingPage = pdf.numPages <= 3 || billingKeywords.some(kw => textLower.includes(kw));
+        
+        if (isBillingPage) {
+          billingText += `Page ${i}:\n${pageText}\n\n`;
+        }
       }
-      return fullText;
+      
+      if (!billingText.trim()) {
+        throw new Error("Could not identify any billing-related pages in this PDF. Please ensure it's a valid hospital bill.");
+      }
+      
+      return billingText;
     } catch (err) {
       console.error("PDF Extraction error:", err);
       throw new Error("PDF Error: " + err.message);
@@ -88,7 +103,7 @@ export default function DiscrepancyFinder() {
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
+        body: JSON.stringify({ text, model: selectedModel })
       });
 
       if (!response.ok) {
@@ -296,9 +311,21 @@ export default function DiscrepancyFinder() {
           <Upload size={48} className="upload-icon" />
           <h3>Drag &amp; Drop Hospital Bill PDF</h3>
           <p>or click to browse (Max 20MB)</p>
-          <p style={{fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '6px'}}>
-            Powered by <strong>Gemini 2.5 Flash Lite</strong>
-          </p>
+          <div className="model-selector" style={{marginTop: '15px'}} onClick={e => e.stopPropagation()}>
+            <label htmlFor="model-select" style={{fontSize: '0.85rem', color: 'var(--text-secondary)', marginRight: '10px'}}>AI Model:</label>
+            <select 
+              id="model-select"
+              value={selectedModel} 
+              onChange={(e) => setSelectedModel(e.target.value)}
+              style={{padding: '6px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '0.85rem', backgroundColor: '#fff', cursor: 'pointer', outline: 'none'}}
+            >
+              <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite (Fastest)</option>
+              <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+              <option value="gemini-2.5-pro">Gemini 2.5 Pro (Most Capable)</option>
+              <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+              <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+            </select>
+          </div>
           <input type="file" className="file-input" ref={fileInputRef} onChange={handleFileUpload} accept=".pdf" />
         </div>
       ) : status === 'loading' ? (

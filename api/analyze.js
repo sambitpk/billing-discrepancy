@@ -2,7 +2,6 @@
 // The GEMINI_API_KEY env variable is set in Vercel dashboard (or .env locally).
 // It is NEVER sent to the client browser.
 
-const MODEL = 'gemini-2.5-flash-lite'; // Simplest model, 1M input tokens free tier
 
 const COMPLIANCE_RULES = [
   { id: 'CR-01', type: 'unbundling', code: '71046', conflicts: ['99233'], description: 'Chest X-ray (71046) should typically be bundled if billed alongside high-complexity E&M (99233) on the same date.' },
@@ -28,7 +27,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Server misconfiguration: GEMINI_API_KEY is not set.' });
   }
 
-  const { text } = req.body;
+  const { text, model = 'gemini-2.5-flash-lite' } = req.body;
   if (!text || text.trim().length < 50) {
     return res.status(400).json({ error: 'No valid bill text provided.' });
   }
@@ -68,7 +67,7 @@ Respond ONLY in valid JSON (no markdown fences, no extra text) using this EXACT 
   "summary": ""
 }`;
 
-  const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`;
+  const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   try {
     const geminiRes = await fetch(GEMINI_URL, {
