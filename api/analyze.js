@@ -78,7 +78,8 @@ Respond ONLY in valid JSON (no markdown fences, no extra text) using this EXACT 
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.1,
-          maxOutputTokens: 8192
+          maxOutputTokens: 8192,
+          responseMimeType: "application/json"
         }
       })
     });
