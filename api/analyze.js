@@ -2,7 +2,7 @@
 // The GEMINI_API_KEY env variable is set in Vercel dashboard (or .env locally).
 // It is NEVER sent to the client browser.
 
-const MODEL = 'gemini-2.0-flash-lite'; // Simplest model, 1M input tokens free tier
+const MODEL = 'gemini-2.5-flash-lite'; // Simplest model, 1M input tokens free tier
 
 const COMPLIANCE_RULES = [
   { id: 'CR-01', type: 'unbundling', code: '71046', conflicts: ['99233'], description: 'Chest X-ray (71046) should typically be bundled if billed alongside high-complexity E&M (99233) on the same date.' },

@@ -297,7 +297,7 @@ export default function DiscrepancyFinder() {
           <h3>Drag &amp; Drop Hospital Bill PDF</h3>
           <p>or click to browse (Max 20MB)</p>
           <p style={{fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '6px'}}>
-            Powered by <strong>Gemini 2.0 Flash Lite</strong>
+            Powered by <strong>Gemini 2.5 Flash Lite</strong>
           </p>
           <input type="file" className="file-input" ref={fileInputRef} onChange={handleFileUpload} accept=".pdf" />
         </div>
