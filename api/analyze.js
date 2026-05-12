@@ -68,7 +68,7 @@ Respond ONLY in valid JSON (no markdown fences, no extra text) using this EXACT 
   "summary": ""
 }`;
 
-  const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/${MODEL}:generateContent?key=${apiKey}`;
+  const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`;
 
   try {
     const geminiRes = await fetch(GEMINI_URL, {
@@ -79,7 +79,7 @@ Respond ONLY in valid JSON (no markdown fences, no extra text) using this EXACT 
         generationConfig: {
           temperature: 0.1,
           maxOutputTokens: 8192,
-          responseMimeType: "application/json"
+          response_mime_type: "application/json"
         }
       })
     });
